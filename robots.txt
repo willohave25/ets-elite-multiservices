@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://www.etselitemultiservices.com/sitemap.xml
+
+# Pages légales - indexables mais basse priorité
+Allow: /mentions-legales.html
+Allow: /cgv.html
+Allow: /confidentialite.html
