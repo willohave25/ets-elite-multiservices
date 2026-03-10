@@ -179,4 +179,114 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  /* -----------------------------------------
+     Carousel témoignages auto-défilant
+     ----------------------------------------- */
+  var carousels = document.querySelectorAll('.carousel-temoignages');
+  carousels.forEach(function (carousel) {
+    var piste = carousel.querySelector('.carousel-piste');
+    var slides = carousel.querySelectorAll('.carousel-slide');
+    var btnPrec = carousel.querySelector('.carousel-btn-prec');
+    var btnSuiv = carousel.querySelector('.carousel-btn-suiv');
+    var points = carousel.querySelectorAll('.carousel-point');
+    var progressBar = carousel.querySelector('.carousel-progress-bar');
+
+    if (!piste || slides.length === 0) return;
+
+    var indexActuel = 0;
+    var total = slides.length;
+    var intervalle = 5000;
+    var timer = null;
+    var progressTimer = null;
+    var progressStart = 0;
+
+    function allerA(index) {
+      if (index < 0) index = total - 1;
+      if (index >= total) index = 0;
+      indexActuel = index;
+      piste.style.transform = 'translateX(-' + (indexActuel * 100) + '%)';
+      majPoints();
+      resetProgress();
+    }
+
+    function suivant() {
+      allerA(indexActuel + 1);
+    }
+
+    function precedent() {
+      allerA(indexActuel - 1);
+    }
+
+    function majPoints() {
+      points.forEach(function (p, i) {
+        if (i === indexActuel) {
+          p.classList.add('actif');
+        } else {
+          p.classList.remove('actif');
+        }
+      });
+    }
+
+    function resetProgress() {
+      if (progressBar) {
+        progressBar.style.transition = 'none';
+        progressBar.style.width = '0%';
+        void progressBar.offsetWidth;
+        progressBar.style.transition = 'width ' + intervalle + 'ms linear';
+        progressBar.style.width = '100%';
+      }
+    }
+
+    function demarrerAuto() {
+      stopperAuto();
+      resetProgress();
+      timer = setInterval(suivant, intervalle);
+    }
+
+    function stopperAuto() {
+      clearInterval(timer);
+    }
+
+    /* Boutons navigation */
+    if (btnPrec) btnPrec.addEventListener('click', function () {
+      precedent();
+      demarrerAuto();
+    });
+    if (btnSuiv) btnSuiv.addEventListener('click', function () {
+      suivant();
+      demarrerAuto();
+    });
+
+    /* Points cliquables */
+    points.forEach(function (p, i) {
+      p.addEventListener('click', function () {
+        allerA(i);
+        demarrerAuto();
+      });
+    });
+
+    /* Swipe tactile */
+    var touchStartX = 0;
+    var touchEndX = 0;
+    carousel.addEventListener('touchstart', function (e) {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    carousel.addEventListener('touchend', function (e) {
+      touchEndX = e.changedTouches[0].screenX;
+      var diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) { suivant(); } else { precedent(); }
+        demarrerAuto();
+      }
+    }, { passive: true });
+
+    /* Pause au survol */
+    carousel.addEventListener('mouseenter', stopperAuto);
+    carousel.addEventListener('mouseleave', demarrerAuto);
+
+    /* Initialisation */
+    majPoints();
+    demarrerAuto();
+  });
+
 });
